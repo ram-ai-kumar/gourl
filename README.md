@@ -12,8 +12,29 @@ A smart CLI utility for managing and quickly opening project URLs across differe
 
 ## Installation
 
+### Option 1: Install Script (Recommended)
+
 ```bash
-git clone <repository>
+curl -sSL https://raw.githubusercontent.com/ram-ai-kumar/gourl/main/install.sh | bash
+```
+
+### Option 2: Homebrew
+
+```bash
+brew tap ram-ai-kumar/gourl
+brew install gourl
+```
+
+### Option 3: Go Install
+
+```bash
+go install github.com/ram-ai-kumar/gourl@latest
+```
+
+### Option 4: Build from Source
+
+```bash
+git clone https://github.com/ram-ai-kumar/gourl.git
 cd gourl
 go build -o gourl
 ```
@@ -29,7 +50,7 @@ go run main.go
 ### Basic Commands
 
 ```bash
-# Open production URL (default)
+# Show help message
 gourl
 
 # Open specific environment
@@ -94,7 +115,7 @@ gourl set dev http://localhost:3000
 # Daily usage
 gourl prod          # Opens production in browser
 gourl dev           # Opens local dev server
-gourl               # Defaults to production
+gourl               # Shows help message
 
 # Check what's configured
 gourl list

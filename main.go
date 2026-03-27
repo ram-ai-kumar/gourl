@@ -16,9 +16,9 @@ type Config map[string]string
 func main() {
 	args := os.Args[1:]
 
-	// 1. Default 'gourl' -> Open production
+	// 1. Default 'gourl' -> Show help
 	if len(args) == 0 {
-		openUrl("production")
+		printHelp()
 		return
 	}
 
@@ -128,7 +128,7 @@ func listConfig() {
 func printHelp() {
 	fmt.Println("gourl - Project URL Manager")
 	fmt.Println("\nUsage:")
-	fmt.Println("  gourl              Opens 'production' URL")
+	fmt.Println("  gourl              Show this help message")
 	fmt.Println("  gourl <env>        Opens specific URL (e.g., prod, staging, dev)")
 	fmt.Println("  gourl set <env> <url>   Save a URL")
 	fmt.Println("  gourl list         List all saved URLs")
