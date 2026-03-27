@@ -21,7 +21,8 @@ curl -sSL https://raw.githubusercontent.com/ram-ai-kumar/gourl/main/install.sh |
 ### Option 2: Homebrew
 
 ```bash
-brew install ram-ai-kumar/gourl/gourl
+# Install from HEAD (latest commit)
+brew install --head https://github.com/ram-ai-kumar/gourl/raw/main/gourl.rb
 ```
 
 ### Option 3: Go Install

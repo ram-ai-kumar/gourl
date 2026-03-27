@@ -1,8 +1,7 @@
 class Gourl < Formula
   desc "Smart CLI utility for managing and quickly opening project URLs"
   homepage "https://github.com/ram-ai-kumar/gourl"
-  url "https://github.com/ram-ai-kumar/gourl.git",
-    tag: "v1.0.0",
+  head "https://github.com/ram-ai-kumar/gourl.git",
     revision: "HEAD"
   license "MIT"
 
