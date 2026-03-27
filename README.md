@@ -107,3 +107,7 @@ go build -o gourl
 ```
 
 This creates a `gourl` executable you can move to your PATH for system-wide use.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
