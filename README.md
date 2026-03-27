@@ -15,14 +15,13 @@ A smart CLI utility for managing and quickly opening project URLs across differe
 ### Option 1: Install Script (Recommended)
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/ram-ai-kumar/gourl/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/ram-ai-kumar/gourl/main/install-source.sh | bash
 ```
 
 ### Option 2: Homebrew
 
 ```bash
-# Install from HEAD (latest commit)
-brew install --head https://github.com/ram-ai-kumar/gourl/raw/main/gourl.rb
+brew install --HEAD ram-ai-kumar/gourl/gourl
 ```
 
 ### Option 3: Go Install
