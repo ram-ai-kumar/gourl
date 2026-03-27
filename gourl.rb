@@ -1,9 +1,10 @@
 class Gourl < Formula
   desc "Smart CLI utility for managing and quickly opening project URLs"
   homepage "https://github.com/ram-ai-kumar/gourl"
-  head "https://github.com/ram-ai-kumar/gourl.git",
+  url "https://github.com/ram-ai-kumar/gourl.git",
     revision: "HEAD"
   license "MIT"
+  version "1.0.0"
 
   depends_on "go" => :build
 

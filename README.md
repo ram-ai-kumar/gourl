@@ -21,7 +21,8 @@ curl -sSL https://raw.githubusercontent.com/ram-ai-kumar/gourl/main/install-sour
 ### Option 2: Homebrew
 
 ```bash
-brew install --HEAD ram-ai-kumar/gourl/gourl
+brew tap ram-ai-kumar/gourl
+brew install ram-ai-kumar/gourl/gourl
 ```
 
 ### Option 3: Go Install
