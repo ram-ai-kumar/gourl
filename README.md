@@ -20,7 +20,7 @@ A smart CLI utility for managing and quickly opening project URLs across differe
 
 Default (**Edge** version from `develop` branch):
 ```bash
-curl -sSL https://raw.githubusercontent.com/ram-ai-kumar/gourl/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/ram-ai-kumar/gourl/main/install-source.sh | bash
 ```
 
 Stable (**Stable** version from `main` branch):
