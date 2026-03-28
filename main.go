@@ -1,10 +1,15 @@
+// Package main provides the gourl CLI, a secure local-first URL manager for developers.
+// It allows mapping environment names (prod, staging, dev) to project-specific URLs
+// and opening them in the default browser with zero trust principles.
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 )
@@ -39,10 +44,153 @@ func main() {
 		fmt.Printf("gourl version %s\n", Version)
 	case "help", "--help", "-h":
 		printHelp()
+	case "-i", "--interactive":
+		runInteractiveSetup()
+	case "--purge":
+		force := false
+		for _, arg := range args {
+			if arg == "--force" {
+				force = true
+			}
+		}
+		purge(force)
 	default:
+		// Check if any argument is --purge (in case it's not the first)
+		isPurge := false
+		for _, arg := range args {
+			if arg == "--purge" {
+				isPurge = true
+				break
+			}
+		}
+		if isPurge {
+			force := false
+			for _, arg := range args {
+				if arg == "--force" {
+					force = true
+				}
+			}
+			purge(force)
+			return
+		}
 		// 2. 'gourl <env>' -> Open specific env
 		openUrl(command)
 	}
+}
+
+// purge removes the gourl binary from the system.
+// If force is false, it prompts the user for confirmation.
+// project-specific .cache/ directories are explicitly preserved.
+func purge(force bool) {
+	// 1. Locate the executable
+	exePath, err := os.Executable()
+	if err != nil {
+		fmt.Printf("❌ Error: Could not locate gourl executable: %v\n", err)
+		os.Exit(1)
+	}
+
+	// 2. Resolve symlinks
+	realPath, err := filepath.EvalSymlinks(exePath)
+	if err != nil {
+		realPath = exePath // Fallback to raw path if symlink resolution fails
+	}
+
+	// 3. Confirmation
+	if !force {
+		fmt.Printf("⚠️  Are you sure you want to uninstall gourl? (this will remove the binary at %s) [y/N]: ", realPath)
+		var response string
+		fmt.Scanln(&response)
+		response = strings.ToLower(strings.TrimSpace(response))
+		if response != "y" && response != "yes" {
+			fmt.Println("❌ Uninstallation cancelled.")
+			return
+		}
+	}
+
+	// 4. Remove the binary
+	err = os.Remove(realPath)
+	if err != nil {
+		fmt.Printf("❌ Error: Failed to remove binary: %v\n", err)
+		if runtime.GOOS == "windows" {
+			fmt.Println("💡 Note: On Windows, you may need to close other instances of gourl before uninstalled.")
+		}
+		os.Exit(1)
+	}
+
+	fmt.Println("✅ gourl has been successfully uninstalled.")
+	fmt.Println("💡 Note: Your project-specific .cache/ folders were preserved.")
+}
+
+// runInteractiveSetup launches a guided CLI experience to configure project URLs.
+// It detects the framework (Go, Node, etc.) and suggests default development ports.
+func runInteractiveSetup() {
+	fmt.Println("🌟 gourl Interactive Setup")
+	fmt.Println("This guide will help you configure URLs for this project.")
+
+	// 1. Detect project type
+	projectType, defaultPort := detectProject()
+	if projectType != "" {
+		fmt.Printf("🔍 Detected %s project. Suggested dev port: %s\n", projectType, defaultPort)
+	}
+
+	scanner := bufio.NewScanner(os.Stdin)
+	envs := []string{"dev", "staging", "production"}
+	config := loadConfig()
+
+	for _, env := range envs {
+		defaultUrl := ""
+		if env == "dev" && defaultPort != "" {
+			defaultUrl = fmt.Sprintf("http://localhost:%s", defaultPort)
+		}
+
+		prompt := fmt.Sprintf("Enter URL for %s", env)
+		if defaultUrl != "" {
+			prompt += fmt.Sprintf(" [%s]", defaultUrl)
+		}
+		fmt.Printf("%s: ", prompt)
+
+		scanner.Scan()
+		input := strings.TrimSpace(scanner.Text())
+
+		if input == "" && defaultUrl != "" {
+			input = defaultUrl
+		}
+
+		if input != "" {
+			config[env] = input
+		}
+	}
+
+	// 2. Save configuration
+	os.MkdirAll(".cache", 0755)
+	data, _ := json.MarshalIndent(config, "", "  ")
+	os.WriteFile(configPath, data, 0644)
+
+	fmt.Println("\n✅ Configuration saved to .cache/gourls.json")
+	listConfig()
+	checkAndSuggestGitignore()
+}
+
+// detectProject scans the current directory for well-known framework markers.
+// Returns the framework name and its standard development port.
+func detectProject() (string, string) {
+	markers := map[string]struct {
+		name string
+		port string
+	}{
+		"go.mod":           {"Go", "8080"},
+		"package.json":     {"Node.js", "3000"},
+		"Gemfile":          {"Ruby/Rails", "3000"},
+		"requirements.txt": {"Python", "8000"},
+		"Cargo.toml":       {"Rust", "8080"},
+	}
+
+	for marker, info := range markers {
+		if _, err := os.Stat(marker); err == nil {
+			return info.name, info.port
+		}
+	}
+	return "", ""
 }
 
 func normalizeEnv(env string) string {
@@ -144,6 +292,9 @@ func printHelp() {
 	fmt.Println("  gourl list         List all saved URLs")
 	fmt.Println("  gourl version      Show version information")
 	fmt.Println("  gourl help         Show this help message")
+	fmt.Println("  gourl -i, --interactive   Guided setup for project URLs")
+	fmt.Println("  gourl --purge      Uninstall gourl (removes the binary)")
+	fmt.Println("  gourl --purge --force  Uninstall without confirmation")
 	fmt.Println("\nEnvironment Aliases:")
 	fmt.Println("  prod, p, live     → production")
 	fmt.Println("  stg, stage        → staging")

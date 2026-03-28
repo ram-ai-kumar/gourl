@@ -8,6 +8,7 @@
 `gourl` does not assume its environment's security.
 
 - **URL Validation**: All incoming requests to open a URL must match a pre-verified configuration in the project's local JSON file.
+- **Context-Aware Verification**: The tool's guided setup (`gourl -i`) detects the underlying project architecture (e.g., Go, Node, Rails) to provide verified environment defaults, reducing configuration errors.
 - **System Separation**: `gourl` separates the responsibility of *storing* a URL from the responsibility of *opening* it by leveraging the user's default, system-hardened browser environment.
 
 ### 2. **Principle of Least Privilege (PoLP)**
@@ -17,6 +18,18 @@
 ### 3. **Environment Isolation**
 - **Logical Air-Gapping**: Project-specific configurations are physically and logically segregated into individual `.cache` folders.
 - **Cross-Contamination Protection**: The tool lacks a central "shared" configuration by default (unless specifically implemented as a global feature), preventing a breach in one project folder from automatically compromising URLs in another.
+- **Ephemeral System Footprint**: The `purge` command allows for complete removal of the tool's binary and system-level installation artifacts, ensuring a clean state when it's no longer required.
+
+### Environment Isolation Model
+```text
+/Project-A/             /Project-B/             /Project-C/
+  |                       |                       |
+  +-- .cache/gourls.json  +-- .cache/gourls.json  +-- .cache/gourls.json
+  | (Isolated Data)       | (Isolated Data)       | (Isolated Data)
+  |                       |                       |
+  V                       V                       V
+[gourl CLI]             [gourl CLI]             [gourl CLI]
+```
 
 ---
 

@@ -36,6 +36,25 @@ gourl version
 gourl -v
 ```
 
+### Uninstallation
+```bash
+gourl --purge
+```
+This command uninstalls `gourl` by removing the binary from your system. It will ask for confirmation unless the `--force` flag is provided:
+```bash
+gourl --purge --force
+```
+*Note: Your project-specific `.cache/` folders will not be deleted.*
+
+### Interactive Setup
+```bash
+gourl -i
+# or
+gourl --interactive
+```
+Launches a guided setup to configure `dev`, `staging`, and `production` URLs for the current project. 
+`gourl` automatically detects common project types (Go, Node.js, Rails, Python, Rust) and suggests default development ports (e.g., `localhost:3000` for Node/Rails).
+
 ---
 
 ## Environment Aliases
@@ -78,6 +97,26 @@ echo '.cache/' >> .gitignore
 
 ## Technical Features
 
-- **Cross-Platform**: Native support for macOS (`open`), Windows (`rundll32`), and Linux (`xdg-open` or `wslview` for WSL).
-- **Assisted Setup**: Helpful prompts when environments are missing or configuration is incomplete.
+- **Missing Config Assistant**: If you run `gourl prod` in a project that hasn't been configured yet, the tool will:
+    1. Check for the missing `.cache/gourls.json`.
+    2. Prompt you with: `No URLs configured for this project. Run 'gourl set prod <url>' to get started.`
+    3. Detect if `.cache/` is git-ignored and suggest the appropriate command to update your `.gitignore`.
 - **Robust Installation**: The modern installer supports binary downloads with automatic source build fallback if the binary is unavailable for your architecture.
+
+---
+
+## Development & Testing
+
+For contributors or developers looking to verify their installation:
+
+### Unit Tests
+```bash
+make test
+```
+
+### Feature Tests (godog)
+`gourl` uses the `godog` (Cucumber) framework for behavioral testing.
+```bash
+make test-features
+```
+*For a detailed breakdown of our test suite, see our [Testing Guide](testing.md).*

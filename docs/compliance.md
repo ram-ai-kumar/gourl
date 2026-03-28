@@ -28,6 +28,17 @@ In the event of a discovered vulnerability in the Go toolchain:
 
 ---
 
+## Data Sovereignty & Retention
+
+`gourl` is engineered for maximum data control. All configuration data is stored locally within the user's project directories.
+
+- **Storage Location**: `.cache/gourls.json`
+- **Retention Policy**: Configuration data is retained indefinitely by default until manually deleted.
+- **Uninstallation Behavior (Purge)**: Running `gourl --purge` removes the application's executable but **explicitly preserves** all project-specific `.cache/` directories. This ensures project continuity while allowing for tool-level cleanup.
+- **Contextual Privacy**: The guided setup (`gourl -i`) uses only local filesystem markers (e.g., `go.mod`) to suggest non-identifiable, standard development ports.
+
+---
+
 ## Licensing & IP
 
 - **Transparency**: Fully open-source under the [MIT License](LICENSE).
