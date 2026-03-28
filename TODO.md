@@ -1,17 +1,5 @@
 # Upcoming changes
 
-## Documentation & Governance Overhaul (DONE)
-
-- [x] Re-apply robust installer logic (`curl -fsSL`, `--stable`, source fallback) to `install.sh`
-- [x] Implement `gourl version` command and `Version` metadata in `main.go`
-- [x] Create `docs/` suite:
-  - [x] `usage.md`: Comprehensive command and configuration guide
-  - [x] `governance.md`: Executive summary of security and compliance
-  - [x] `security.md`: Local-first architecture and dependency risk analysis
-  - [x] `compliance.md`: Supply chain integrity and vulnerability SLA
-  - [x] `zta.md`: Zero Trust Architecture posture (Least Privilege)
-- [x] Refactor `README.md` to point to the new documentation suite
-
 ## add godog (cucumber framework)
 
 - add godog framework and define test cases to cover entire functionality
