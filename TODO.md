@@ -162,3 +162,22 @@ func printHelp() {
 }
 
 ```
+
+## purge
+
+- [ ] "gourl --purge" should uninstall itself and remove all app files it has installed. ".cache/" folders will survive the purge
+
+## interactive dev setup
+
+- [ ] "interactive dev setup": gourl -i or --interactive should ask user interactively if they want to setup dev, prod, staging URLs, if the current project is an app being developed with source code present at the root of the current folder.
+
+## global URLs
+
+- [ ] "gourl set --global <env> <url>" should save the URL globally, not just for the current project.
+- [ ] "gourl list --global" should list all globally saved URLs.
+- [ ] "gourl dev" in a rails project folder should pickup "localhost:3000" from the standard global dev config list even if ".cache/urls.json" is not defined in that rails project folder.
+- [ ] when installing, gourl should install global defaults for rails, go, rust, node, python and other common development languages. So, when user runs "gourl dev" in a rails project folder, it should pickup "localhost:3000" from the standard global dev config list even if ".cache/urls.json" is not defined in that rails project folder. Similarly for other languages.
+
+## favourite URLs
+
+- [ ] "gourl set --favourite <env> <url>" should save the URL as a favourite, not just for the current project.
