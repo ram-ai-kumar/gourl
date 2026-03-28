@@ -1,9 +1,24 @@
-# Updated Core Functionality
+# Upcoming changes
 
-## install "edge" and "stable"
+## Documentation & Governance Overhaul (DONE)
 
-- install "edge" version from "develop" branch, by default
-- "stable" version can be installed with a "--stable" option from the "main" branch
+- [x] Re-apply robust installer logic (`curl -fsSL`, `--stable`, source fallback) to `install.sh`
+- [x] Implement `gourl version` command and `Version` metadata in `main.go`
+- [x] Create `docs/` suite:
+  - [x] `usage.md`: Comprehensive command and configuration guide
+  - [x] `governance.md`: Executive summary of security and compliance
+  - [x] `security.md`: Local-first architecture and dependency risk analysis
+  - [x] `compliance.md`: Supply chain integrity and vulnerability SLA
+  - [x] `zta.md`: Zero Trust Architecture posture (Least Privilege)
+- [x] Refactor `README.md` to point to the new documentation suite
+
+## add godog (cucumber framework)
+
+- add godog framework and define test cases to cover entire functionality
+
+## build and release
+
+- write a script/feature to build and release the next version of this tool
 
 ## Automatic Aliasing
 
