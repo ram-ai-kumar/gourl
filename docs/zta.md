@@ -8,7 +8,7 @@
 `gourl` does not assume its environment's security.
 
 - **URL Validation**: All incoming requests to open a URL must match a pre-verified configuration in the project's local JSON file.
-- **Context-Aware Verification**: The tool's guided setup (`gourl -i`) detects the underlying project architecture (e.g., Go, Node, Rails) to provide verified environment defaults, reducing configuration errors.
+- **Context-Aware Verification**: The tool's guided setup (`gourl -i`) detects the underlying project architecture (e.g., Go, Node.js, Yarn, pnpm, Bun, Rails) to provide verified environment defaults, reducing configuration errors.
 - **System Separation**: `gourl` separates the responsibility of *storing* a URL from the responsibility of *opening* it by leveraging the user's default, system-hardened browser environment.
 
 ### 2. **Principle of Least Privilege (PoLP)**

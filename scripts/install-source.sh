@@ -22,7 +22,7 @@ git clone --branch "$BRANCH" --single-branch https://github.com/ram-ai-kumar/gou
 
 echo "🔨 Building gourl..."
 cd "$TEMP_DIR"
-go build -o "$INSTALL_DIR/$BINARY_NAME"
+go build -o "$INSTALL_DIR/$BINARY_NAME" ./cmd/gourl
 
 # Cleanup
 cd /

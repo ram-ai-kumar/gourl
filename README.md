@@ -11,7 +11,7 @@ A smart CLI utility for managing and quickly opening project URLs across differe
 - **🔗 Environment Aliases**: Use intuitive shorthand like `p`, `stg`, or `local`.
 - **📂 Local Configuration**: Project-specific URL mappings stored in `.cache/gourls.json`.
 - **💻 Cross-Platform**: Native support for macOS, Windows (CMD/PowerShell), and Linux (including WSL).
-- **🛠️ Assisted Setup**: Helpful prompts and `.gitignore` suggestions for first-time users.
+- **🛠️ Assisted Setup**: Helpful prompts and `.gitignore` suggestions for first-time users, with automatic detection for Go, Node.js (npm, Yarn, pnpm, Bun), Rails, Python, and Rust.
 - **🛡️ Governance-Ready**: Secure-by-design, local-first architecture with zero external dependencies.
 
 ---
@@ -22,19 +22,19 @@ A smart CLI utility for managing and quickly opening project URLs across differe
 
 Default (**Edge** version from `develop` branch):
 ```bash
-curl -sSL https://raw.githubusercontent.com/ram-ai-kumar/gourl/main/install-source.sh | bash
+curl -sSL https://raw.githubusercontent.com/ram-ai-kumar/gourl/main/scripts/install-source.sh | bash
 ```
 
 Stable (**Stable** version from `main` branch):
 ```bash
-curl -sSL https://raw.githubusercontent.com/ram-ai-kumar/gourl/main/install.sh | bash -s -- --stable
+curl -sSL https://raw.githubusercontent.com/ram-ai-kumar/gourl/main/scripts/install.sh | bash -s -- --stable
 ```
 
 > [!NOTE]
 > The modern installer includes **automatic source build fallback**. If a pre-compiled binary is not found for your specific architecture, it will automatically attempt to build from source using [Go](https://go.dev/doc/install).
 
 ### Other Options
-- **Homebrew**: `brew install --head https://github.com/ram-ai-kumar/gourl/raw/main/gourl.rb`
+- **Homebrew**: `brew install --head https://github.com/ram-ai-kumar/gourl/raw/main/scripts/gourl.rb`
 - **Go Install**: `go install github.com/ram-ai-kumar/gourl@latest`
 
 ---

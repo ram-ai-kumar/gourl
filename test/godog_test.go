@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"encoding/json"
@@ -563,7 +563,7 @@ func (t *testSuite) runGourlCommand(args ...string) error {
 	}
 
 	// Build binary
-	buildCmd := exec.Command("go", "build", "-o", binaryPath, ".")
+	buildCmd := exec.Command("go", "build", "-o", binaryPath, "./cmd/gourl")
 	buildCmd.Dir = "/Users/ram/Work/code/dev-stack/gourl"
 	output, err := buildCmd.CombinedOutput()
 	if err != nil {
@@ -595,7 +595,7 @@ func (t *testSuite) runGourlCommandWithInputs(inputs []string, args ...string) e
 	}
 
 	// Build binary
-	buildCmd := exec.Command("go", "build", "-o", binaryPath, ".")
+	buildCmd := exec.Command("go", "build", "-o", binaryPath, "./cmd/gourl")
 	buildCmd.Dir = "/Users/ram/Work/code/dev-stack/gourl"
 	output, err := buildCmd.CombinedOutput()
 	if err != nil {
@@ -663,7 +663,7 @@ func TestFeatures(t *testing.T) {
 		},
 		Options: &godog.Options{
 			Format:   "pretty",
-			Paths:    []string{"features"},
+			Paths:    []string{"../features"},
 			TestingT: t,
 		},
 	}

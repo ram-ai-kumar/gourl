@@ -14,6 +14,7 @@ We use two primary testing tiers:
 ## Running Tests
 
 ### Automated via Makefile
+
 The simplest way to run all tests is via the provided `Makefile`:
 
 ```bash
@@ -28,9 +29,11 @@ make test-all
 ```
 
 ### Manual godog execution
+
 If you have `godog` installed globally:
+
 ```bash
-godog features/
+go test -v ./test/
 ```
 
 ---
@@ -39,19 +42,19 @@ godog features/
 
 Our `features/` directory contains specialized tests for every governance pillar:
 
-| Category | Description |
-| -------- | ----------- |
-| **`smoke_tests.feature`** | High-level "sanity checks" to ensure basic binary operations. |
-| **`basic_functionality.feature`** | Verifies `set`, `list`, and environment opening logic. |
-| **`environment_aliases.feature`** | Ensures `prod`/`p` and `stg`/`stage` resolve correctly. |
-| **`purge.feature`** | Verifies self-uninstallation while preserving `.cache/` data. |
-| **`interactive_setup.feature`** | Tests the guided configuration and framework detection. |
-| **`security_tests.feature`** | Validates URL sanitization and process-level security. |
-| **`security_tests.feature`** | Validates URL sanitization and process-level security. |
-| **`zta_tests.feature`** | Verifies project-level isolation and "Never Trust" logic. |
-| **`compliance_tests.feature`** | Checks for SBOM integrity and licensing. |
-| **`negative_tests.feature`** | Verifies graceful error handling for missing configs or invalid inputs. |
-| **`edge_cases.feature`** | Tests unusual inputs, long URLs, and platform-specific quirks. |
+| Category                          | Description                                                             |
+| --------------------------------- | ----------------------------------------------------------------------- |
+| **`smoke_tests.feature`**         | High-level "sanity checks" to ensure basic binary operations.           |
+| **`basic_functionality.feature`** | Verifies `set`, `list`, and environment opening logic.                  |
+| **`environment_aliases.feature`** | Ensures `prod`/`p` and `stg`/`stage` resolve correctly.                 |
+| **`purge.feature`**               | Verifies self-uninstallation while preserving `.cache/` data.           |
+| **`interactive.feature`**         | Tests the guided configuration and framework detection.                 |
+| **`security_tests.feature`**      | Validates URL sanitization and process-level security.                  |
+| **`security_tests.feature`**      | Validates URL sanitization and process-level security.                  |
+| **`zta_tests.feature`**           | Verifies project-level isolation and "Never Trust" logic.               |
+| **`compliance_tests.feature`**    | Checks for SBOM integrity and licensing.                                |
+| **`negative_tests.feature`**      | Verifies graceful error handling for missing configs or invalid inputs. |
+| **`edge_cases.feature`**          | Tests unusual inputs, long URLs, and platform-specific quirks.          |
 
 ---
 
@@ -60,6 +63,7 @@ Our `features/` directory contains specialized tests for every governance pillar
 To begin contributing or running feature tests for the first time:
 
 1. **Install godog**:
+
    ```bash
    make dev-setup
    # or
@@ -68,7 +72,7 @@ To begin contributing or running feature tests for the first time:
 
 2. **Run with Verbose Output**:
    ```bash
-   godog --format=pretty features/smoke_tests.feature
+   go test -v ./test/ --godog.format=pretty
    ```
 
 ---
@@ -82,13 +86,17 @@ Every pull request to `main` or `develop` triggers the full test suite in GitHub
 ## Specialized Test Logics
 
 ### Interactive CLI Simulation
-To test the `gourl -i` guided setup, we use the `runGourlCommandWithInputs` helper in `godog_test.go`. This function:
+
+To test the `gourl -i` guided setup, we use the `runGourlCommandWithInputs` helper in `test/godog_test.go`. This function:
+
 1.  **Redirects Stdin**: Uses a Go pipe to feed simulated user responses into the tool.
 2.  **Concurrency**: Spawns a goroutine to write inputs to the tool's stdin while the main process executes.
 3.  **Captures Context**: Verifies that the tool correctly identifies the project type (e.g., `go.mod`) even during simulated interactions.
 
 ### Binary Self-Removal (Purge)
+
 Testing `gourl --purge` requires the tool to delete its own binary. Our test suite handles this by:
+
 1.  **Copying Binary**: Creating a temporary build of `gourl` in a sandbox directory.
 2.  **Executing Sandbox**: Running the command on the sandboxed binary.
-3.  **Post-Run Verification**: Confirming the sandbox file exists *before* and is gone *after* the command completes.
+3.  **Post-Run Verification**: Confirming the sandbox file exists _before_ and is gone _after_ the command completes.

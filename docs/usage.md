@@ -40,10 +40,8 @@ gourl -v
 ```bash
 gourl --purge
 ```
-This command uninstalls `gourl` by removing the binary from your system. It will ask for confirmation unless the `--force` flag is provided:
-```bash
-gourl --purge --force
-```
+This command uninstalls `gourl` by instantly removing the binary from your system. 
+
 *Note: Your project-specific `.cache/` folders will not be deleted.*
 
 ### Interactive Setup
@@ -53,7 +51,7 @@ gourl -i
 gourl --interactive
 ```
 Launches a guided setup to configure `dev`, `staging`, and `production` URLs for the current project. 
-`gourl` automatically detects common project types (Go, Node.js, Rails, Python, Rust) and suggests default development ports (e.g., `localhost:3000` for Node/Rails).
+`gourl` automatically detects common project types (Go, Node.js, Yarn, pnpm, Bun, Rails, Python, Rust) and suggests default development ports (e.g., `localhost:3000` for Node/Rails).
 
 ---
 

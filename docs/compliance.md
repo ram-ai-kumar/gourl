@@ -21,7 +21,7 @@ We proactively monitor the following channels for vulnerabilities:
 In the event of a discovered vulnerability in the Go toolchain:
 - **Triage**: Within 24 hours of public disclosure.
 - **Remediation**: Build against the latest patched Go version.
-- **Redistribution**: Immediate update to the official GitHub `main` branch, enabling all users to patch via `install.sh`.
+- **Redistribution**: Immediate update to the official GitHub `main` branch, enabling all users to patch via `scripts/install.sh`.
 
 ### Verification Tools
 - **CodeScan**: Regular use of `govulncheck` to identify known vulnerabilities in the current build environment.
@@ -48,4 +48,4 @@ In the event of a discovered vulnerability in the Go toolchain:
 
 ## Technical Auditing
 
-Users are encouraged to audit the source code directly at [github.com/ram-ai-kumar/gourl](https://github.com/ram-ai-kumar/gourl). The `install.sh` script is fully scriptable and transparent for automated security reviews.
+Users are encouraged to audit the source code directly at [github.com/ram-ai-kumar/gourl](https://github.com/ram-ai-kumar/gourl). The `scripts/install.sh` script is fully scriptable and transparent for automated security reviews.

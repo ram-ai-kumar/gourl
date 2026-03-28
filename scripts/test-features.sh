@@ -15,10 +15,12 @@ fi
 
 # Build the main binary first
 echo "🔨 Building gourl binary..."
-go build -o gourl .
+mkdir -p bin
+export GOMODCACHE=$(pwd)/.cache/gomodcache
+go build -o bin/gourl ./cmd/gourl
 
 # Run the feature tests
 echo "🚀 Running feature tests..."
-godog
+go test -v ./test/...
 
 echo "✅ All feature tests completed!"

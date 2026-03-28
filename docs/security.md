@@ -30,7 +30,7 @@
 ## Binary Integrity & Distribution
 
 ### Secure Download
-The **Installer (`install.sh`)** uses TLS (HTTPS) exclusively for all downloads from GitHub's official release channels. 
+The **Installer (`scripts/install.sh`)** uses TLS (HTTPS) exclusively for all downloads from GitHub's official release channels. 
 
 ### Modern Build Pipeline
 Our build system uses [Go Releaser](https://goreleaser.com/) to ensure clean, reproducible binaries from the verified source code on branch `main`.
