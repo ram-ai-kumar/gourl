@@ -6,8 +6,8 @@
 set -e
 
 REPO="ram-ai-kumar/gourl"
-INSTALL_DIR="$HOME/.local/bin"
-BINARY_NAME="gourl"
+INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
+BINARY_NAME="${BINARY_NAME:-gourl}"
 TEMP_DIR=$(mktemp -d)
 
 echo "🚀 Installing gourl from $REPO..."
@@ -16,8 +16,9 @@ echo "🚀 Installing gourl from $REPO..."
 mkdir -p "$INSTALL_DIR"
 
 # Clone and build
-echo "📥 Cloning repository..."
-git clone https://github.com/ram-ai-kumar/gourl.git "$TEMP_DIR"
+BRANCH=${1:-develop}
+echo "📥 Cloning repository (branch: $BRANCH)..."
+git clone --branch "$BRANCH" --single-branch https://github.com/ram-ai-kumar/gourl.git "$TEMP_DIR"
 
 echo "🔨 Building gourl..."
 cd "$TEMP_DIR"

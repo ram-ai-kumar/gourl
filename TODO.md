@@ -1,20 +1,24 @@
-# Updated Core Functionality
+# Upcoming changes
 
-## Smart Command Routing
+## Documentation & Governance Overhaul (DONE)
 
-The utility acts as a "smart dispatcher." It checks if the first word after gourl is a known command (like set) or a known environment (like prod).
-gourl: Opens the production URL by default.
-gourl prod or gourl production: Opens the production URL.
-gourl staging: Opens the staging URL.
-gourl dev: Opens the local development server.
-gourl <any-custom-key>: If you saved a URL as api, then gourl api opens that URL.
+- [x] Re-apply robust installer logic (`curl -fsSL`, `--stable`, source fallback) to `install.sh`
+- [x] Implement `gourl version` command and `Version` metadata in `main.go`
+- [x] Create `docs/` suite:
+  - [x] `usage.md`: Comprehensive command and configuration guide
+  - [x] `governance.md`: Executive summary of security and compliance
+  - [x] `security.md`: Local-first architecture and dependency risk analysis
+  - [x] `compliance.md`: Supply chain integrity and vulnerability SLA
+  - [x] `zta.md`: Zero Trust Architecture posture (Least Privilege)
+- [x] Refactor `README.md` to point to the new documentation suite
 
-## The set Command (Configuration)
+## add godog (cucumber framework)
 
-This builds your local map. It targets a .cache/gourls.json file in your current directory.
-Command: gourl set <name> <url>
-Example: gourl set prod https://myapp.com
-Example: gourl set dev http://localhost:3000
+- add godog framework and define test cases to cover entire functionality
+
+## build and release
+
+- write a script/feature to build and release the next version of this tool
 
 ## Automatic Aliasing
 
@@ -170,6 +174,13 @@ func printHelp() {
 ## interactive dev setup
 
 - [ ] "interactive dev setup": gourl -i or --interactive should ask user interactively if they want to setup dev, prod, staging URLs, if the current project is an app being developed with source code present at the root of the current folder.
+
+## env category
+
+- [ ] "gourl set --global rails:dev <url>" should save the URL globally for rails dev category. "--global" is optional.
+- [ ] "gourl dev" in a rails project folder should pickup "localhost:3000" from the standard global dev config list even if ".cache/urls.json" is not defined in that rails project folder.
+- [ ] similarly for other common or popular languages like go, rust, node, python, etc.
+- [ ] "gourl list" should list all saved URLs, grouped by category.
 
 ## global URLs
 

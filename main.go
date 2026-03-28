@@ -11,6 +11,8 @@ import (
 
 const configPath = ".cache/gourls.json"
 
+var Version = "dev"
+
 type Config map[string]string
 
 func main() {
@@ -33,6 +35,8 @@ func main() {
 		saveConfig(args[1], args[2])
 	case "list":
 		listConfig()
+	case "version", "--version", "-v":
+		fmt.Printf("gourl version %s\n", Version)
 	case "help", "--help", "-h":
 		printHelp()
 	default:
@@ -132,6 +136,7 @@ func printHelp() {
 	fmt.Println("  gourl <env>        Opens specific URL (e.g., prod, staging, dev)")
 	fmt.Println("  gourl set <env> <url>   Save a URL")
 	fmt.Println("  gourl list         List all saved URLs")
+	fmt.Println("  gourl version      Show version information")
 	fmt.Println("  gourl help         Show this help message")
 	fmt.Println("\nEnvironment Aliases:")
 	fmt.Println("  prod, p, live     → production")
