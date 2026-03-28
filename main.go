@@ -30,7 +30,7 @@ func main() {
 	case "set":
 		if len(args) < 3 {
 			fmt.Println("Usage: gourl set <env> <url>")
-			return
+			os.Exit(1)
 		}
 		saveConfig(args[1], args[2])
 	case "list":
@@ -92,6 +92,12 @@ func openUrl(env string) {
 			fmt.Println("💡 No URLs configured for this project.")
 			checkAndSuggestGitignore()
 		}
+		os.Exit(1)
+	}
+
+	// Check if we're in test mode and stub the opening
+	if os.Getenv("GOURL_TEST_MODE") == "1" {
+		fmt.Printf("🧪 TEST MODE: Would open %s (stubbed)\n", url)
 		return
 	}
 
