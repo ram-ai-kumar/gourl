@@ -2,7 +2,6 @@ package internal
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -12,30 +11,71 @@ import (
 func PrintHelp() {
 	fmt.Println("gourl - Project URL Manager")
 	fmt.Println("\nUsage:")
-	fmt.Println("  gourl              Show this help message")
-	fmt.Println("  gourl <env>        Opens specific URL (e.g., prod, staging, dev)")
-	fmt.Println("  gourl set <env> <url>   Save a URL")
-	fmt.Println("  gourl list         List all saved URLs")
-	fmt.Println("  gourl version      Show version information")
-	fmt.Println("  gourl help         Show this help message")
-	fmt.Println("  gourl -i, --interactive   Guided setup for project URLs")
-	fmt.Println("  gourl --purge      Uninstall gourl (removes the binary)")
+	fmt.Println("  gourl                    Show this help message")
+	fmt.Println("  gourl <env>              Opens specific URL (e.g., prod, staging, dev)")
+	fmt.Println("  gourl set <env> <url>    Save a URL to local project config")
+	fmt.Println("  gourl set -g <env> <url> Save a URL to global config (~/.cache/gourls.json)")
+	fmt.Println("  gourl unset <env>        Remove a URL from local project config")
+	fmt.Println("  gourl unset -g <env>     Remove a URL from global config")
+	fmt.Println("  gourl list               List all URLs (merged local and global)")
+	fmt.Println("  gourl version            Show version information")
+	fmt.Println("  gourl help               Show this help message")
+	fmt.Println("  gourl -i, --interactive  Guided setup for project URLs")
+	fmt.Println("  gourl --purge            Uninstall gourl (removes the binary)")
 	fmt.Println("\nEnvironment Aliases:")
 	fmt.Println("  prod, p, live     → production")
 	fmt.Println("  stg, stage        → staging")
 	fmt.Println("  d, local          → dev")
 }
 
-// ListConfig displays all configured URLs for the current project.
+// ListConfig displays all configured URLs for the current project context.
 func ListConfig() {
-	cfg := LoadConfig()
-	if len(cfg) == 0 {
+	// Merged view
+	localCfg, _ := LoadConfig(LocalConfigPath)
+	globalPath, _ := GetGlobalConfigPath()
+	globalCfg, _ := LoadConfig(globalPath)
+
+	// Combine them for listing
+	merged := make(map[string]struct {
+		url    string
+		source string
+	})
+
+	// Global first
+	for env, url := range globalCfg.Envs {
+		merged[env] = struct {
+			url    string
+			source string
+		}{url: url, source: "global"}
+	}
+
+	// Local overrides
+	for env, url := range localCfg.Envs {
+		merged[env] = struct {
+			url    string
+			source string
+		}{url: url, source: "local"}
+	}
+
+	// If dev is missing, check project default
+	if _, ok := merged["dev"]; !ok {
+		projectType, _ := DetectProject()
+		if url, ok := globalCfg.Defaults[projectType]; ok {
+			merged["dev"] = struct {
+				url    string
+				source string
+			}{url: url, source: "default"}
+		}
+	}
+
+	if len(merged) == 0 {
 		fmt.Println("No URLs configured.")
 		return
 	}
+
 	fmt.Println("Configured URLs:")
-	for env, url := range cfg {
-		fmt.Printf("%-12s: %s\n", env, url)
+	for env, info := range merged {
+		fmt.Printf("%-12s: %-30s (%s)\n", env, info.url, info.source)
 	}
 }
 
@@ -52,36 +92,41 @@ func RunInteractiveSetup() {
 
 	scanner := bufio.NewScanner(os.Stdin)
 	envs := []string{"dev", "staging", "production"}
-	cfg := LoadConfig()
+	cfg, _ := LoadConfig(LocalConfigPath)
 
 	for _, env := range envs {
-		defaultUrl := ""
-		if env == "dev" && defaultPort != "" {
-			defaultUrl = fmt.Sprintf("http://localhost:%s", defaultPort)
+		// Use existing value or project default as suggestion
+		existingUrl, ok := cfg.Envs[env]
+		suggestion := ""
+		if ok {
+			suggestion = existingUrl
+		} else if env == "dev" && defaultPort != "" {
+			suggestion = fmt.Sprintf("http://localhost:%s", defaultPort)
 		}
 
 		prompt := fmt.Sprintf("Enter URL for %s", env)
-		if defaultUrl != "" {
-			prompt += fmt.Sprintf(" [%s]", defaultUrl)
+		if suggestion != "" {
+			prompt += fmt.Sprintf(" [%s]", suggestion)
 		}
 		fmt.Printf("%s: ", prompt)
 
 		scanner.Scan()
 		input := strings.TrimSpace(scanner.Text())
 
-		if input == "" && defaultUrl != "" {
-			input = defaultUrl
+		if input == "" && suggestion != "" {
+			input = suggestion
 		}
 
 		if input != "" {
-			cfg[env] = input
+			cfg.Envs[env] = input
 		}
 	}
 
 	// 2. Save configuration
-	os.MkdirAll(".cache", 0755)
-	data, _ := json.MarshalIndent(cfg, "", "  ")
-	os.WriteFile(ConfigFileName, data, 0644)
+	if err := SaveConfig(LocalConfigPath, cfg); err != nil {
+		fmt.Printf("❌ Error: Failed to save config: %v\n", err)
+		return
+	}
 
 	fmt.Println("\n✅ Configuration saved to .cache/gourls.json")
 	ListConfig()

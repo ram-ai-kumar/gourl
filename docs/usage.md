@@ -17,11 +17,23 @@ gourl <env>
 ```
 Example: `gourl prod` opens the production URL in your default browser.
 
-### Saving a URL
-```bash
-gourl set <env> <url>
-```
 Example: `gourl set staging https://staging.myapp.com`
+
+#### Save a Global URL
+```bash
+gourl set --global <env> <url>
+# or
+gourl set -g <env> <url>
+```
+Global URLs are stored in `~/.cache/gourls.json` and serve as defaults across all projects.
+
+### Removing a URL
+```bash
+gourl unset <env> [options]
+```
+Options:
+- `--global`, `-g`: Remove from global configuration.
+Example: `gourl unset staging` (removes from local config).
 
 ### Listing All URLs
 ```bash
@@ -72,8 +84,14 @@ You can use either the shorthand or the full name interchangeably.
 ## Configuration Details
 
 ### Storage Location
-Project-specific configuration is stored in:
-`.cache/gourls.json`
+- **Local Config**: `.cache/gourls.json` (Project-specific)
+- **Global Config**: `~/.cache/gourls.json` (User-specific defaults)
+
+### Resolution Priority
+When you run `gourl <env>`, the tool resolves the URL in the following order:
+1.  **Local Project Config** (Overrides all)
+2.  **Global User Config**
+3.  **Project-Specific Defaults** (e.g., `8080` for Go, `3000` for Node, pre-seeded into the global config)
 
 ### Format
 The configuration is a simple JSON mapping:

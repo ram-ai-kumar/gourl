@@ -22,7 +22,7 @@ A smart CLI utility for managing and quickly opening project URLs across differe
 
 Default (**Edge** version from `develop` branch):
 ```bash
-curl -sSL https://raw.githubusercontent.com/ram-ai-kumar/gourl/main/scripts/install-source.sh | bash
+curl -sSL https://raw.githubusercontent.com/ram-ai-kumar/gourl/develop/scripts/install-source.sh | bash
 ```
 
 Stable (**Stable** version from `main` branch):
@@ -34,7 +34,7 @@ curl -sSL https://raw.githubusercontent.com/ram-ai-kumar/gourl/main/scripts/inst
 > The modern installer includes **automatic source build fallback**. If a pre-compiled binary is not found for your specific architecture, it will automatically attempt to build from source using [Go](https://go.dev/doc/install).
 
 ### Other Options
-- **Homebrew**: `brew install --head https://github.com/ram-ai-kumar/gourl/raw/main/scripts/gourl.rb`
+- **Homebrew**: `brew install --head https://github.com/ram-ai-kumar/gourl/raw/develop/scripts/gourl.rb`
 - **Go Install**: `go install github.com/ram-ai-kumar/gourl@latest`
 
 ---

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
@@ -10,9 +11,28 @@ import (
 var Version = "dev"
 
 func main() {
-	args := os.Args[1:]
+	// Root flags
+	helpFlag := flag.Bool("help", false, "Show help message")
+	versionFlag := flag.Bool("version", false, "Show version information")
+	purgeFlag := flag.Bool("purge", false, "Uninstall gourl")
 
-	// 1. Default 'gourl' -> Show help
+	flag.Usage = internal.PrintHelp
+	flag.Parse()
+
+	if *helpFlag {
+		internal.PrintHelp()
+		return
+	}
+	if *versionFlag {
+		fmt.Printf("gourl version %s\n", Version)
+		return
+	}
+	if *purgeFlag {
+		internal.PurgeApp()
+		return
+	}
+
+	args := flag.Args()
 	if len(args) == 0 {
 		internal.PrintHelp()
 		return
@@ -22,53 +42,95 @@ func main() {
 
 	switch command {
 	case "set":
-		if len(args) < 3 {
-			fmt.Println("Usage: gourl set <env> <url>")
+		setCmd := flag.NewFlagSet("set", flag.ExitOnError)
+		global := setCmd.Bool("global", false, "Save to global config")
+		setCmd.BoolVar(global, "g", false, "Save to global config")
+
+		setCmd.Parse(args[1:])
+		setArgs := setCmd.Args()
+
+		if len(setArgs) < 2 {
+			fmt.Println("Usage: gourl set [--global] <env> <url>")
 			os.Exit(1)
 		}
-		if err := internal.SaveConfig(args[1], args[2]); err != nil {
+		env := setArgs[0]
+		url := setArgs[1]
+
+		path := internal.LocalConfigPath
+		if *global {
+			var err error
+			path, err = internal.GetGlobalConfigPath()
+			if err != nil {
+				fmt.Printf("❌ Error: Could not determine global config path: %v\n", err)
+				os.Exit(1)
+			}
+		}
+
+		cfg, _ := internal.LoadConfig(path)
+		if *global {
+			internal.PreseedDefaults(cfg)
+		}
+		cfg.Envs[internal.NormalizeEnv(env)] = url
+
+		if err := internal.SaveConfig(path, cfg); err != nil {
 			fmt.Printf("❌ Error: Failed to save config: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Printf("✅ Saved %s -> %s\n", internal.NormalizeEnv(args[1]), args[2])
+		scope := "local"
+		if *global {
+			scope = "global"
+		}
+		fmt.Printf("✅ Saved %s -> %s (%s)\n", internal.NormalizeEnv(env), url, scope)
+
+	case "unset":
+		unsetCmd := flag.NewFlagSet("unset", flag.ExitOnError)
+		global := unsetCmd.Bool("global", false, "Remove from global config")
+		unsetCmd.BoolVar(global, "g", false, "Remove from global config")
+
+		unsetCmd.Parse(args[1:])
+		unsetArgs := unsetCmd.Args()
+
+		if len(unsetArgs) < 1 {
+			fmt.Println("Usage: gourl unset [--global] <env>")
+			os.Exit(1)
+		}
+		env := unsetArgs[0]
+		if err := internal.UnsetConfig(env, *global); err != nil {
+			fmt.Printf("❌ Error: Failed to unset environment: %v\n", err)
+			os.Exit(1)
+		}
+		scope := "local"
+		if *global {
+			scope = "global"
+		}
+		fmt.Printf("✅ Unset %s (%s)\n", internal.NormalizeEnv(env), scope)
+
 	case "list":
 		internal.ListConfig()
-	case "version", "--version", "-v":
+
+	case "version", "-v":
 		fmt.Printf("gourl version %s\n", Version)
-	case "help", "--help", "-h":
+
+	case "help", "-h":
 		internal.PrintHelp()
+
 	case "-i", "--interactive":
 		internal.RunInteractiveSetup()
-	case "--purge":
-		internal.PurgeApp()
+
 	default:
-		// Check if any argument is --purge (in case it's not the first)
-		isPurge := false
-		for _, arg := range args {
-			if arg == "--purge" {
-				isPurge = true
-				break
-			}
-		}
-		if isPurge {
-			internal.PurgeApp()
-			return
-		}
 		// 2. 'gourl <env>' -> Open specific env
 		openUrl(command)
 	}
 }
 
 func openUrl(env string) {
-	env = internal.NormalizeEnv(env)
-	cfg := internal.LoadConfig()
-	url, ok := cfg[env]
+	url, ok := internal.GetConfigValue(env)
 
 	if !ok {
 		fmt.Printf("❌ No URL found for '%s'. Run: gourl set %s <url>\n", env, env)
 
-		// Check if config file exists and suggest gitignore
-		if _, err := os.Stat(internal.ConfigFileName); os.IsNotExist(err) {
+		// Check if local config file exists and suggest gitignore
+		if _, err := os.Stat(internal.LocalConfigPath); os.IsNotExist(err) {
 			fmt.Println("💡 No URLs configured for this project.")
 			internal.CheckAndSuggestGitignore()
 		}

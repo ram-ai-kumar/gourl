@@ -2,6 +2,12 @@
 
 ## Release v0.2.0 (High Priority - P0)
 
+### [x] unset
+
+- **Command**: `gourl unset <env>`
+- **Behavior**: Remove the URL from the environment mapping.
+- **Scope**: Supports local and `--global` removal.
+
 ### [ ] build and release
 
 - **Task**: Write a script/feature to build and release the next version of this tool.
@@ -21,21 +27,18 @@
 
 ## Release v0.3.0 (Medium Priority - P1)
 
-### [ ] env category
+### [x] env category
 
-- **Command**: `gourl set --global rails:dev <url>`
+- **Command**: `gourl set --global <env> <url>`
 - **Behavior**: Save the URL globally for a specific project category (e.g., `rails`, `go`, `node`).
-- **Flags**: `--global` is optional if a category prefix is used.
-- **Smart Resolution**: `gourl dev` in a rails project folder should pickup `localhost:3000` from the standard global `rails:dev` config even if `.cache/gourls.json` is missing.
-- **Coverage**: Support common languages like Go, Rust, Node, Python, etc.
-- **Listing**: `gourl list` should group results by category.
+- **Standard Defaults**: Pre-seed global list with standard URLs during the first global set.
+- **Listing**: `gourl list` groups and shows the source (local, global, or default).
 
-### [ ] global URLs
+### [x] global URLs
 
 - **Command**: `gourl set --global <env> <url>`
 - **Behavior**: Save the URL globally, accessible from any project folder.
-- **Listing**: `gourl list --global` to show global mappings.
-- **Default Integration**: During installation, `gourl` should pre-seed global defaults for common frameworks (e.g., `rails` -> `localhost:3000`, `go` -> `localhost:8080`, etc.).
+- **Listing**: `gourl list` includes user mappings from `~/.cache/gourls.json`.
 
 ---
 
