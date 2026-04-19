@@ -1,0 +1,93 @@
+# .goreleaser.yml - Release automation for gourl
+# https://goreleaser.com/customization/
+
+version: 2
+
+# Runs before the main build process
+before:
+  hooks:
+    - go mod tidy
+
+# Main build configuration
+builds:
+  - id: gourl
+    main: ./cmd/gourl
+    binary: gourl
+    ldflags:
+      - -X main.Version={{.Version}}
+    goos:
+      - linux
+      - darwin
+      - windows
+      - freebsd
+      - openbsd
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+
+# Archive configuration
+archives:
+  - format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_ {{- .Version }}_ {{- .Os }}_ {{- .Arch }}
+    format_overrides:
+      - goos: windows
+        format: zip
+
+# Checksum generation
+checksum:
+  name_template: "SHA256SUMS.txt"
+  algorithm: sha256
+
+# Changelog configuration
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+      - "^chore:"
+      - "^refactor:"
+
+# Release configuration
+release:
+  github:
+    owner: ram-ai-kumar
+    name: gourl
+  draft: false
+  prerelease: auto
+  mode: replace
+
+# Homebrew casks configuration (replaces deprecated brews)
+homebrew_casks:
+  - name: gourl
+    description: "Quick URL launcher for development environments"
+    homepage: "https://github.com/ram-ai-kumar/gourl"
+    license: "MIT"
+
+    # Repository to push the formula to
+    repository:
+      owner: ram-ai-kumar
+      name: homebrew-tap
+
+    # Directory to place the formula
+    directory: Formula
+
+    # Custom install command
+    install: |-
+      bin.install "gourl"
+
+    # Test command
+    test: |-
+      system "#{bin}/gourl --version"
+
+# Source archive (optional, for package managers)
+source:
+  enabled: true
+  format: tar.gz
+  name_template: "{{ .ProjectName }}_{{ .Version }}_source"

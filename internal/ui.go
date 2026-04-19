@@ -15,9 +15,11 @@ func PrintHelp() {
 	fmt.Println("  gourl <env>              Opens specific URL (e.g., prod, staging, dev)")
 	fmt.Println("  gourl set <env> <url>    Save a URL to local project config")
 	fmt.Println("  gourl set -g <env> <url> Save a URL to global config (~/.cache/gourls.json)")
+	fmt.Println("  gourl set -f <env> <url> Save a URL to favourites (~/.cache/gourl-favourites.json)")
 	fmt.Println("  gourl unset <env>        Remove a URL from local project config")
 	fmt.Println("  gourl unset -g <env>     Remove a URL from global config")
-	fmt.Println("  gourl list               List all URLs (merged local and global)")
+	fmt.Println("  gourl unset -f <env>     Remove a URL from favourites")
+	fmt.Println("  gourl list               List all URLs (merged local, global, and favourites)")
 	fmt.Println("  gourl version            Show version information")
 	fmt.Println("  gourl help               Show this help message")
 	fmt.Println("  gourl -i, --interactive  Guided setup for project URLs")
@@ -34,6 +36,8 @@ func ListConfig() {
 	localCfg, _ := LoadConfig(LocalConfigPath)
 	globalPath, _ := GetGlobalConfigPath()
 	globalCfg, _ := LoadConfig(globalPath)
+	favPath, _ := GetFavouritesConfigPath()
+	favCfg, _ := LoadConfig(favPath)
 
 	// Combine them for listing
 	merged := make(map[string]struct {
@@ -55,6 +59,14 @@ func ListConfig() {
 			url    string
 			source string
 		}{url: url, source: "local"}
+	}
+
+	// Favourites
+	for env, url := range favCfg.Favourites {
+		merged[env] = struct {
+			url    string
+			source string
+		}{url: url, source: "favourite"}
 	}
 
 	// If dev is missing, check project default

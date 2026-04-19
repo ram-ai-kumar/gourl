@@ -11,8 +11,9 @@ const LocalConfigPath = ".cache/gourls.json"
 
 // Config represents a mapping of environments to URLs.
 type Config struct {
-	Envs     map[string]string `json:"envs,omitempty"`     // Environment mappings
-	Defaults map[string]string `json:"defaults,omitempty"` // Project-type defaults (global only)
+	Envs       map[string]string `json:"envs,omitempty"`       // Environment mappings
+	Defaults   map[string]string `json:"defaults,omitempty"`   // Project-type defaults (global only)
+	Favourites map[string]string `json:"favourites,omitempty"` // Favourite URLs for quick access
 }
 
 // GetGlobalConfigPath returns the absolute path to ~/.cache/gourls.json.
@@ -22,6 +23,15 @@ func GetGlobalConfigPath() (string, error) {
 		return "", err
 	}
 	return filepath.Join(home, ".cache", "gourls.json"), nil
+}
+
+// GetFavouritesConfigPath returns the absolute path to ~/.cache/gourl-favourites.json.
+func GetFavouritesConfigPath() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(home, ".cache", "gourl-favourites.json"), nil
 }
 
 // NormalizeEnv maps environment shorthand to standard keys.
@@ -42,24 +52,27 @@ func NormalizeEnv(env string) string {
 func LoadConfig(path string) (*Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return &Config{Envs: make(map[string]string), Defaults: make(map[string]string)}, err
+		return &Config{Envs: make(map[string]string), Defaults: make(map[string]string), Favourites: make(map[string]string)}, err
 	}
 	var cfg Config
 	// Support both legacy (flat map) and new (structured) formats
 	var flatMap map[string]string
 	if err := json.Unmarshal(data, &flatMap); err == nil {
 		// If it's a flat map, migrate it to Envs
-		return &Config{Envs: flatMap, Defaults: make(map[string]string)}, nil
+		return &Config{Envs: flatMap, Defaults: make(map[string]string), Favourites: make(map[string]string)}, nil
 	}
 
 	if err := json.Unmarshal(data, &cfg); err != nil {
-		return &Config{Envs: make(map[string]string), Defaults: make(map[string]string)}, err
+		return &Config{Envs: make(map[string]string), Defaults: make(map[string]string), Favourites: make(map[string]string)}, err
 	}
 	if cfg.Envs == nil {
 		cfg.Envs = make(map[string]string)
 	}
 	if cfg.Defaults == nil {
 		cfg.Defaults = make(map[string]string)
+	}
+	if cfg.Favourites == nil {
+		cfg.Favourites = make(map[string]string)
 	}
 	return &cfg, nil
 }
@@ -80,7 +93,7 @@ func SaveConfig(path string, cfg *Config) error {
 	return os.WriteFile(path, data, 0644)
 }
 
-// GetConfigValue resolves a URL checking local, then global, then project defaults.
+// GetConfigValue resolves a URL checking local, then global, then project defaults, then favourites.
 func GetConfigValue(env string) (string, bool) {
 	env = NormalizeEnv(env)
 
@@ -107,6 +120,15 @@ func GetConfigValue(env string) (string, bool) {
 		}
 	}
 
+	// 4. Check favourites
+	favPath, err := GetFavouritesConfigPath()
+	if err == nil {
+		favCfg, _ := LoadConfig(favPath)
+		if url, ok := favCfg.Favourites[env]; ok {
+			return url, true
+		}
+	}
+
 	return "", false
 }
 
@@ -124,6 +146,19 @@ func UnsetConfig(env string, isGlobal bool) error {
 
 	cfg, _ := LoadConfig(path)
 	delete(cfg.Envs, env)
+	return SaveConfig(path, cfg)
+}
+
+// UnsetFavourite removes a mapping from favourites config.
+func UnsetFavourite(env string) error {
+	env = NormalizeEnv(env)
+	path, err := GetFavouritesConfigPath()
+	if err != nil {
+		return err
+	}
+
+	cfg, _ := LoadConfig(path)
+	delete(cfg.Favourites, env)
 	return SaveConfig(path, cfg)
 }
 

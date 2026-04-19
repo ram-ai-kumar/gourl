@@ -45,40 +45,56 @@ func main() {
 		setCmd := flag.NewFlagSet("set", flag.ExitOnError)
 		global := setCmd.Bool("global", false, "Save to global config")
 		setCmd.BoolVar(global, "g", false, "Save to global config")
+		favourite := setCmd.Bool("favourite", false, "Save to favourites")
+		setCmd.BoolVar(favourite, "f", false, "Save to favourites")
 
 		setCmd.Parse(args[1:])
 		setArgs := setCmd.Args()
 
 		if len(setArgs) < 2 {
-			fmt.Println("Usage: gourl set [--global] <env> <url>")
+			fmt.Println("Usage: gourl set [--global|--favourite] <env> <url>")
 			os.Exit(1)
 		}
 		env := setArgs[0]
 		url := setArgs[1]
 
-		path := internal.LocalConfigPath
-		if *global {
+		var path string
+		var scope string
+
+		if *favourite {
+			var err error
+			path, err = internal.GetFavouritesConfigPath()
+			if err != nil {
+				fmt.Printf("❌ Error: Could not determine favourites config path: %v\n", err)
+				os.Exit(1)
+			}
+			scope = "favourite"
+		} else if *global {
 			var err error
 			path, err = internal.GetGlobalConfigPath()
 			if err != nil {
 				fmt.Printf("❌ Error: Could not determine global config path: %v\n", err)
 				os.Exit(1)
 			}
+			scope = "global"
+		} else {
+			path = internal.LocalConfigPath
+			scope = "local"
 		}
 
 		cfg, _ := internal.LoadConfig(path)
 		if *global {
 			internal.PreseedDefaults(cfg)
 		}
-		cfg.Envs[internal.NormalizeEnv(env)] = url
+		if *favourite {
+			cfg.Favourites[internal.NormalizeEnv(env)] = url
+		} else {
+			cfg.Envs[internal.NormalizeEnv(env)] = url
+		}
 
 		if err := internal.SaveConfig(path, cfg); err != nil {
 			fmt.Printf("❌ Error: Failed to save config: %v\n", err)
 			os.Exit(1)
-		}
-		scope := "local"
-		if *global {
-			scope = "global"
 		}
 		fmt.Printf("✅ Saved %s -> %s (%s)\n", internal.NormalizeEnv(env), url, scope)
 
@@ -86,22 +102,35 @@ func main() {
 		unsetCmd := flag.NewFlagSet("unset", flag.ExitOnError)
 		global := unsetCmd.Bool("global", false, "Remove from global config")
 		unsetCmd.BoolVar(global, "g", false, "Remove from global config")
+		favourite := unsetCmd.Bool("favourite", false, "Remove from favourites")
+		unsetCmd.BoolVar(favourite, "f", false, "Remove from favourites")
 
 		unsetCmd.Parse(args[1:])
 		unsetArgs := unsetCmd.Args()
 
 		if len(unsetArgs) < 1 {
-			fmt.Println("Usage: gourl unset [--global] <env>")
+			fmt.Println("Usage: gourl unset [--global|--favourite] <env>")
 			os.Exit(1)
 		}
 		env := unsetArgs[0]
-		if err := internal.UnsetConfig(env, *global); err != nil {
+		
+		var scope string
+		var err error
+		
+		if *favourite {
+			err = internal.UnsetFavourite(env)
+			scope = "favourite"
+		} else {
+			err = internal.UnsetConfig(env, *global)
+			scope = "local"
+			if *global {
+				scope = "global"
+			}
+		}
+		
+		if err != nil {
 			fmt.Printf("❌ Error: Failed to unset environment: %v\n", err)
 			os.Exit(1)
-		}
-		scope := "local"
-		if *global {
-			scope = "global"
 		}
 		fmt.Printf("✅ Unset %s (%s)\n", internal.NormalizeEnv(env), scope)
 
