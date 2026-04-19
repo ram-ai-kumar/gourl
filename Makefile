@@ -1,46 +1,39 @@
 # Makefile for gourl
 
-.PHONY: build test test-features clean install
+.PHONY: build test test-features clean install fmt dev-setup
 
 # Build the gourl binary
 build:
-	go build -o gourl .
+	mkdir -p bin
+	GOMODCACHE=$(shell pwd)/.cache/gomodcache go build -o bin/gourl ./cmd/gourl
 
 # Run unit tests
 test:
-	go test ./...
+	GOMODCACHE=$(shell pwd)/.cache/gomodcache go test ./internal/...
 
 # Run feature tests with godog
-test-features:
-	./test-features.sh
-
-# Install godog if not present and run feature tests
-test-features-deps:
-	@if ! command -v godog &> /dev/null; then \
-		echo "Installing godog..."; \
-		go install github.com/cucumber/godog/cmd/godog@latest; \
-	fi
-	godog
-
-# Clean build artifacts
-clean:
-	rm -f gourl
-	rm -f gourl-*
-	go clean
+test-features: build
+	./scripts/test-features.sh
 
 # Install the binary
 install: build
-	cp gourl $(GOPATH)/bin/ || cp gourl ~/go/bin/ || echo "Please add gourl to your PATH manually"
+	cp bin/gourl $(GOPATH)/bin/ || cp bin/gourl ~/go/bin/ || echo "Please add gourl to your PATH manually"
+
+# Clean build artifacts
+clean:
+	rm -rf bin/
+	rm -f gourl-*
+	GOMODCACHE=$(shell pwd)/.cache/gomodcache go clean
 
 # Format code
 fmt:
-	go fmt ./...
+	GOMODCACHE=$(shell pwd)/.cache/gomodcache go fmt ./...
 
 # Run all tests
 test-all: test test-features
 
 # Development setup
 dev-setup:
-	go install github.com/cucumber/godog/cmd/godog@latest
-	go mod tidy
-	go mod download
+	GOMODCACHE=$(shell pwd)/.cache/gomodcache go install github.com/cucumber/godog/cmd/godog@latest
+	GOMODCACHE=$(shell pwd)/.cache/gomodcache go mod tidy
+	GOMODCACHE=$(shell pwd)/.cache/gomodcache go mod download

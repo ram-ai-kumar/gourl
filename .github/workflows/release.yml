@@ -2,57 +2,32 @@ name: Release
 
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        goos: [linux, darwin, windows]
-        goarch: [amd64, arm64]
-        exclude:
-          - goos: windows
-            goarch: arm64
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: '1.21'
-
-    - name: Build binary
-      env:
-        GOOS: ${{ matrix.goos }}
-        GOARCH: ${{ matrix.goarch }}
-      run: |
-        if [ "$GOOS" = "windows" ]; then
-          go build -o gourl-${{ matrix.goos }}-${{ matrix.goarch }}.exe
-        else
-          go build -o gourl-${{ matrix.goos }}-${{ matrix.goarch }}
-        fi
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: gourl-${{ matrix.goos }}-${{ matrix.goarch }}
-        path: gourl-${{ matrix.goos }}-${{ matrix.goarch }}*
-
   release:
-    needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Download all artifacts
-      uses: actions/download-artifact@v3
-      with:
-        path: artifacts
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
 
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: artifacts/gourl-*/gourl-*
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v5
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

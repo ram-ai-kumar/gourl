@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"encoding/json"
@@ -13,6 +13,7 @@ import (
 	"github.com/cucumber/godog"
 )
 
+// Tests are executed in a isolated sandbox directory to avoid contamination with actual project data.
 const (
 	testDir    = "/tmp/gourl-test"
 	testConfigPath = ".cache/gourls.json"
@@ -514,6 +515,45 @@ func (t *testSuite) InitializeScenario(ctx *godog.ScenarioContext) {
 		}
 		return nil
 	})
+
+	// Purge steps
+	ctx.Given(`^a project with a compiled gourl binary$`, func() error {
+		// This is effectively handled by runGourlCommand which builds it,
+		// but let's ensure .cache exists too.
+		os.MkdirAll(".cache", 0755)
+		return os.WriteFile(testConfigPath, []byte(`{"prod":"https://example.com"}`), 0644)
+	})
+
+	ctx.Then(`^the binary should be removed from the system$`, func() error {
+		binaryPath := filepath.Join(testDir, "gourl")
+		if runtime.GOOS == "windows" {
+			binaryPath += ".exe"
+		}
+		if _, err := os.Stat(binaryPath); !os.IsNotExist(err) {
+			return fmt.Errorf("binary should have been removed")
+		}
+		return nil
+	})
+
+	ctx.Then(`^the "\.cache/gourls\.json" file should still exist$`, func() error {
+		if _, err := os.Stat(testConfigPath); err != nil {
+			return fmt.Errorf("config file should still exist")
+		}
+		return nil
+	})
+
+	// Interactive steps
+	ctx.Given(`^a project with a "([^"]*)" file$`, func(filename string) error {
+		return os.WriteFile(filename, []byte("test content"), 0644)
+	})
+
+	ctx.When(`^I run "gourl -i" and provide inputs:$`, func(table *godog.Table) error {
+		var inputs []string
+		for _, row := range table.Rows {
+			inputs = append(inputs, row.Cells[0].Value)
+		}
+		return t.runGourlCommandWithInputs(inputs, "-i")
+	})
 }
 
 func (t *testSuite) runGourlCommand(args ...string) error {
@@ -523,7 +563,7 @@ func (t *testSuite) runGourlCommand(args ...string) error {
 	}
 
 	// Build binary
-	buildCmd := exec.Command("go", "build", "-o", binaryPath, ".")
+	buildCmd := exec.Command("go", "build", "-o", binaryPath, "./cmd/gourl")
 	buildCmd.Dir = "/Users/ram/Work/code/dev-stack/gourl"
 	output, err := buildCmd.CombinedOutput()
 	if err != nil {
@@ -534,6 +574,52 @@ func (t *testSuite) runGourlCommand(args ...string) error {
 	cmd := exec.Command(binaryPath, args...)
 	cmd.Dir = testDir
 	cmd.Env = append(os.Environ(), "GOURL_TEST_MODE=1")
+	output, err = cmd.CombinedOutput()
+	lastOutput = string(output)
+	if err != nil {
+		lastExitCode = 1
+		lastError = err
+	} else {
+		lastExitCode = 0
+	}
+
+	return nil
+}
+
+// runGourlCommandWithInputs runs the gourl binary and simulates user input via Stdin.
+// It uses a pipe and a separate goroutine to ensure inputs are fed sequentially as requested by the tool.
+func (t *testSuite) runGourlCommandWithInputs(inputs []string, args ...string) error {
+	binaryPath := filepath.Join(testDir, "gourl")
+	if runtime.GOOS == "windows" {
+		binaryPath += ".exe"
+	}
+
+	// Build binary
+	buildCmd := exec.Command("go", "build", "-o", binaryPath, "./cmd/gourl")
+	buildCmd.Dir = "/Users/ram/Work/code/dev-stack/gourl"
+	output, err := buildCmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("failed to build gourl: %v\nBuild output: %s", err, string(output))
+	}
+
+	// Run command with test mode environment
+	cmd := exec.Command(binaryPath, args...)
+	cmd.Dir = testDir
+	cmd.Env = append(os.Environ(), "GOURL_TEST_MODE=1")
+
+	// Set up stdin pipe
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		defer stdin.Close()
+		for _, input := range inputs {
+			fmt.Fprintln(stdin, input)
+		}
+	}()
+
 	output, err = cmd.CombinedOutput()
 	lastOutput = string(output)
 	if err != nil {
@@ -577,7 +663,7 @@ func TestFeatures(t *testing.T) {
 		},
 		Options: &godog.Options{
 			Format:   "pretty",
-			Paths:    []string{"features"},
+			Paths:    []string{"../features"},
 			TestingT: t,
 		},
 	}

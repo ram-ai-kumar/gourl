@@ -4,23 +4,27 @@
 
 ## Executive Summary
 
-As a developer tool designed for local project management, `gourl` adheres to strict data minimization and local-first architectural patterns. We believe that your project URLs are sensitive metadata and should never leave your local machine without your explicit action.
+`gourl` (Project URL Manager) is a secure, local-first utility for developers to manage environment-specific URLs efficiently. Built on a foundation of **Zero-Cloud, Zero-Telemetry**, the tool ensures that sensitive internal URLs never leave the developer's local machine.
 
-## Core Governance Pillars
+### Key Governance Values
+- **Data Sovereignty**: Project configurations remain in local `.cache/` folders.
+- **Context Awareness**: Guided setup (`gourl -i`) uses filesystem markers to suggest safe environment defaults.
+- **Clean Disposal**: Binary uninstallation (`gourl --purge`) leaves no persistent executable footprint behind.
+- **Auditability**: Zero external dependencies and MIT-licensed source code for complete transparency.
 
-### 🔐 [Security Posture](file:///Users/ram/Work/code/dev-stack/gourl/docs/security.md)
+### 🔐 [Security Posture](security.md)
 Detailed analysis of how `gourl` handles data and system interactions.
 - **Local-Only Storage**: All configuration is stored locally in `.cache/gourls.json`.
 - **Zero-Dependency Architecture**: Minimized attack surface using only the Go Standard Library.
 - **Secure Distribution**: Binary integrity and verified release channels.
 
-### 🛡️ [Compliance & Supply Chain](file:///Users/ram/Work/code/dev-stack/gourl/docs/compliance.md)
+### 🛡️ [Compliance & Supply Chain](compliance.md)
 Information on software integrity and regulatory alignment.
 - **SBOM (Software Bill of Materials)**: Full visibility into the build components.
 - **Vulnerability Management (SLA)**: Proactive monitoring and patching strategy for the Go toolchain.
 - **Licensing**: Open-source transparency under the MIT license.
 
-### 🌐 [Zero Trust Architecture (ZTA)](file:///Users/ram/Work/code/dev-stack/gourl/docs/zta.md)
+### 🌐 [Zero Trust Architecture (ZTA)](zta.md)
 Alignment with modern Zero Trust principles.
 - **Never Trust, Always Verify**: How URLs are validated before browser invocation.
 - **Principle of Least Privilege**: Running entirely in user-space without elevated permissions.
